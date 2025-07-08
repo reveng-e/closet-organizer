@@ -1,0 +1,185 @@
+/* Closet Organizer Styles */
+
+body {
+	font-family: "Exo 2", sans-serif;
+	background-image: url("bg.jpg");
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	color: #374151;
+	position: relative;
+}
+
+.container {
+	width: 90%;
+	max-width: 1200px;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	margin: 20px 1rem;
+	border: #374151 4px solid;
+	padding: 2rem;
+	border-radius: 1rem;
+	box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+	position: relative;
+	z-index: 1;
+	background-color: rgba(255, 192, 203, 0.8);
+}
+
+.card {
+	background-color: rgba(255, 255, 255, 0.9);
+	border-radius: 1rem;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	padding: 2rem;
+	margin-bottom: 1.5rem;
+	border: 4px solid rgb(228, 128, 175);
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Form Elements */
+input[type="text"],
+select,
+textarea {
+	border: 1px solid #d1d5db;
+	border-radius: 0.5rem;
+	padding: 0.75rem 1rem;
+	width: 100%;
+	box-sizing: border-box;
+	color: #374151;
+}
+
+button {
+	background-color: #2563eb;
+	padding: 0.75rem 1.5rem;
+	border-radius: 0.5rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s, transform 0.2s;
+}
+
+button:hover {
+	background-color: #1d4ed8;
+	transform: scale(1.05);
+}
+
+/* Category and Item Styles */
+.category-heading {
+	background-color: #e0e7ff;
+	color: #3730a3;
+	padding: 0.5rem 1rem;
+	border-radius: 0.5rem;
+	margin-top: 1.5rem;
+	font-weight: 700;
+	cursor: pointer;
+	user-select: none;
+}
+
+.item-card {
+	background-color: #f9fafb;
+	border-radius: 0.5rem;
+	padding: 1rem;
+	margin-bottom: 0.75rem;
+	border: 1px solid #e5e7eb;
+}
+
+.item-card:hover {
+	transform: translateY(-2px);
+	transition: background-color 0.2s, transform 0.2s;
+}
+
+#closetItemsDisplay {
+	flex: 1 1 0%;
+	min-height: 0;
+	max-height: 500px;
+	overflow-y: auto;
+	padding-right: 8px;
+}
+
+/* Cat Container */
+.cat-container {
+	position: absolute;
+	top: -52px;
+	right: 128px;
+	width: 80px;
+	height: 80px;
+	background: transparent;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.cat-container img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* Image Upload Styles */
+.item-image {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 0.5rem;
+	border: 2px solid #e5e7eb;
+}
+
+.upload-area {
+	border: 2px dashed #d1d5db;
+	border-radius: 0.5rem;
+	padding: 1rem;
+	text-align: center;
+	cursor: pointer;
+	transition: border-color 0.2s;
+}
+
+.upload-area:hover {
+	border-color: #2563eb;
+}
+
+.upload-area.dragover {
+	border-color: #2563eb;
+	background-color: #eff6ff;
+}
+
+/* Grid Layout for Items */
+.items-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 1rem;
+}
+
+.item-card-with-image {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	border: 1px solid #e5e7eb;
+	background-color: #f9fafb;
+}
+
+.item-card-with-image:hover {
+	transform: translateY(-2px);
+	transition: transform 0.2s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.container {
+		margin: 10px 0.5rem;
+		padding: 1rem;
+	}
+	
+	.cat-container {
+		top: -30px;
+		right: 10px;
+		width: 60px;
+		height: 60px;
+	}
+	
+	.items-grid {
+		grid-template-columns: 1fr;
+	}
+}
