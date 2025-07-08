@@ -78,39 +78,53 @@ function showMessage(message, isError = false) {
  */
 async function initializeFirebase() {
 	try {
+		console.log("=== FIREBASE INITIALIZATION DEBUG ===");
+		console.log("1. Starting Firebase initialization...");
 		loadingIndicator.classList.remove("hidden");
 
 		app = initializeApp(firebaseConfig);
+		console.log("2. ✅ Firebase app initialized:", app);
+		
 		db = getFirestore(app);
+		console.log("3. ✅ Firestore initialized:", db);
+		
 		auth = getAuth(app);
+		console.log("4. ✅ Auth initialized:", auth);
+		
 		storage = getStorage(app);
+		console.log("5. ✅ Storage initialized:", storage);
 
 		onAuthStateChanged(auth, async (user) => {
+			console.log("6. Auth state changed. User:", user);
 			if (user) {
 				userId = user.uid;
 				userIdDisplay.textContent = `Your User ID: ${userId}`;
 				isAuthReady = true;
-				console.log("Firebase Auth ready. User ID:", userId);
+				console.log("7. ✅ Firebase Auth ready. User ID:", userId);
 				loadingIndicator.classList.add("hidden");
 				setupRealtimeListener();
 			} else {
+				console.log("8. No user found, attempting sign in...");
 				try {
 					if (initialAuthToken) {
+						console.log("9. Attempting custom token sign in...");
 						await signInWithCustomToken(auth, initialAuthToken);
-						console.log("Signed in with custom token.");
+						console.log("10. ✅ Signed in with custom token.");
 					} else {
+						console.log("9. Attempting anonymous sign in...");
 						await signInAnonymously(auth);
-						console.log("Signed in anonymously.");
+						console.log("10. ✅ Signed in anonymously.");
 					}
 				} catch (error) {
-					console.error("Error during anonymous/custom token sign-in:", error);
+					console.error("❌ Error during anonymous/custom token sign-in:", error);
 					showMessage("Error signing in. Please try again.", true);
 					loadingIndicator.classList.add("hidden");
 				}
 			}
 		});
+		console.log("=== FIREBASE INITIALIZATION COMPLETE ===");
 	} catch (error) {
-		console.error("Error initializing Firebase:", error);
+		console.error("❌ Error initializing Firebase:", error);
 		showMessage("Failed to initialize Firebase. Check console for details.", true);
 		loadingIndicator.classList.add("hidden");
 	}
@@ -120,28 +134,42 @@ async function initializeFirebase() {
  * Sets up a real-time listener for closet items from Firestore.
  */
 function setupRealtimeListener() {
+	console.log("=== SETTING UP REALTIME LISTENER ===");
+	console.log("db:", db);
+	console.log("userId:", userId);
+	
 	if (!db || !userId) {
-		console.warn("Firestore not initialized or userId not available. Cannot set up listener.");
+		console.warn("❌ Firestore not initialized or userId not available. Cannot set up listener.");
+		console.warn("db available:", !!db);
+		console.warn("userId available:", !!userId);
 		return;
 	}
 
-	const closetItemsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/closetItems`);
+	const firestorePath = `artifacts/${appId}/users/${userId}/closetItems`;
+	console.log("✅ Setting up listener for path:", firestorePath);
+	
+	const closetItemsCollectionRef = collection(db, firestorePath);
 	const q = query(closetItemsCollectionRef);
 
 	onSnapshot(
 		q,
 		(snapshot) => {
+			console.log("📥 Firestore snapshot received. Document count:", snapshot.size);
 			const items = [];
 			snapshot.forEach((doc) => {
-				items.push({ id: doc.id, ...doc.data() });
+				const item = { id: doc.id, ...doc.data() };
+				console.log("📄 Document:", item);
+				items.push(item);
 			});
+			console.log("✅ Total items to render:", items.length);
 			renderClosetItems(items);
 		},
 		(error) => {
-			console.error("Error listening to closet items:", error);
+			console.error("❌ Error listening to closet items:", error);
 			showMessage("Error loading items. Please refresh.", true);
 		}
 	);
+	console.log("✅ Listener setup complete");
 }
 
 /**
@@ -297,8 +325,17 @@ function handleImageInput(e) {
  */
 async function handleFormSubmit(event) {
 	event.preventDefault();
+	
+	console.log("=== FORM SUBMISSION DEBUG ===");
+	console.log("1. Form submitted!");
+	console.log("2. isAuthReady:", isAuthReady);
+	console.log("3. userId:", userId);
+	console.log("4. db object:", db);
+	console.log("5. app object:", app);
+	console.log("6. appId:", appId);
 
 	if (!isAuthReady) {
+		console.log("❌ Authentication not ready - stopping here");
 		showMessage("Authentication not ready. Please wait a moment.", true);
 		return;
 	}
@@ -307,41 +344,61 @@ async function handleFormSubmit(event) {
 	const itemCategory = document.getElementById("itemCategory").value;
 	const itemDescription = document.getElementById("itemDescription").value;
 
+	console.log("7. Form data extracted:", { itemName, itemCategory, itemDescription });
+
 	if (!itemName || !itemCategory) {
+		console.log("❌ Missing required fields - stopping here");
 		showMessage("Please enter item name and select a category.", true);
 		return;
 	}
 
 	try {
+		console.log("8. ✅ Starting to add item...");
 		let imageUrl = null;
 
 		// Upload image if one is selected
 		if (selectedImage) {
+			console.log("9. Uploading image...");
 			showMessage("Uploading image...", false);
 			try {
 				imageUrl = await uploadImage(selectedImage, itemName);
+				console.log("10. ✅ Image uploaded:", imageUrl);
 			} catch (imageError) {
-				console.error("Error uploading image:", imageError);
+				console.error("❌ Error uploading image:", imageError);
 				showMessage("Failed to upload image, but item will be saved without image.", true);
 			}
+		} else {
+			console.log("9. No image selected, skipping upload");
 		}
 
 		// Add document to Firestore
-		await addDoc(collection(db, `artifacts/${appId}/users/${userId}/closetItems`), {
+		const firestorePath = `artifacts/${appId}/users/${userId}/closetItems`;
+		console.log("11. Firestore path:", firestorePath);
+		console.log("12. Adding to Firestore...");
+		
+		const docData = {
 			name: itemName,
 			category: itemCategory,
 			description: itemDescription,
 			imageUrl: imageUrl,
 			timestamp: new Date(),
-		});
+		};
+		console.log("13. Document data to save:", docData);
 
+		const docRef = await addDoc(collection(db, firestorePath), docData);
+
+		console.log("14. ✅ Document added with ID:", docRef.id);
 		showMessage("Item added successfully!");
 		document.getElementById("itemForm").reset();
 		clearImage();
+		console.log("15. ✅ Form reset and cleanup complete");
 	} catch (e) {
-		console.error("Error adding document: ", e);
+		console.error("❌ Error adding document: ", e);
+		console.error("❌ Error details:", e.message);
+		console.error("❌ Error code:", e.code);
 		showMessage("Error adding item. Please try again.", true);
 	}
+	console.log("=== END FORM SUBMISSION DEBUG ===");
 }
 
 /**
@@ -376,7 +433,7 @@ function setupDragAndDrop() {
 /**
  * Initialize the application
  */
-function initializeApp() {
+function initializeClosetApp() {
 	// Make clearImage available globally
 	window.clearImage = clearImage;
 	
@@ -393,7 +450,7 @@ function initializeApp() {
 
 // Initialize when DOM is loaded
 if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initializeApp);
+	document.addEventListener('DOMContentLoaded', initializeClosetApp);
 } else {
-	initializeApp();
+	initializeClosetApp();
 }
