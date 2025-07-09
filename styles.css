@@ -123,24 +123,93 @@ button:hover {
 	object-fit: cover;
 	border-radius: 0.5rem;
 	border: 2px solid #e5e7eb;
-}
-
-.upload-area {
-	border: 2px dashed #d1d5db;
-	border-radius: 0.5rem;
-	padding: 1rem;
-	text-align: center;
 	cursor: pointer;
-	transition: border-color 0.2s;
+	transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.upload-area:hover {
-	border-color: #2563eb;
+.item-image:hover {
+	transform: scale(1.05);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.upload-area.dragover {
-	border-color: #2563eb;
-	background-color: #eff6ff;
+/* Modal Styles */
+.image-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.8);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.image-modal.active {
+	opacity: 1;
+	visibility: visible;
+}
+
+.modal-content {
+	position: relative;
+	max-width: 90%;
+	max-height: 90%;
+	background: white;
+	border-radius: 1rem;
+	padding: 1rem;
+	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-image {
+	max-width: 100%;
+	max-height: 80vh;
+	object-fit: contain;
+	border-radius: 0.5rem;
+}
+
+.modal-close {
+	position: absolute;
+	top: -10px;
+	right: -10px;
+	background: #ef4444;
+	color: white;
+	border: none;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	font-size: 20px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	transition: background-color 0.2s;
+}
+
+.modal-close:hover {
+	background: #dc2626;
+	transform: none;
+}
+
+.modal-info {
+	margin-top: 1rem;
+	text-align: center;
+}
+
+.modal-info h3 {
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: #1f2937;
+	margin-bottom: 0.5rem;
+}
+
+.modal-info p {
+	color: #6b7280;
+	margin-bottom: 0.25rem;
 }
 
 /* Grid Layout for Items */
