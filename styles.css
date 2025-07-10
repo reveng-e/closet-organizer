@@ -8,6 +8,8 @@ body {
 	background-repeat: no-repeat;
 	color: #374151;
 	position: relative;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .container {
@@ -234,13 +236,78 @@ button:hover {
 	transition: transform 0.2s;
 }
 
+/* Upload Area Styles */
+.upload-area {
+	border: 2px dashed #d1d5db;
+	border-radius: 0.5rem;
+	padding: 2rem;
+	text-align: center;
+	cursor: pointer;
+	transition: border-color 0.2s, background-color 0.2s;
+}
+
+.upload-area:hover {
+	border-color: #2563eb;
+	background-color: #f8fafc;
+}
+
+.upload-area.dragover {
+	border-color: #2563eb;
+	background-color: #eff6ff;
+}
+
+/* Mobile-specific upload area improvements */
+@media (max-width: 768px) {
+	.upload-area.active {
+		background-color: #e0f2fe;
+		border-color: #0284c7;
+	}
+	
+	/* Improve tap targets */
+	.upload-area,
+	.category-heading,
+	.item-image,
+	button {
+		-webkit-tap-highlight-color: rgba(59, 130, 246, 0.2);
+	}
+	
+	/* Disable text selection on interactive elements */
+	.upload-area,
+	.category-heading,
+	.item-card,
+	.item-card-with-image,
+	button {
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	
+	/* Enable smooth scrolling */
+	html {
+		scroll-behavior: smooth;
+	}
+	
+	/* Better input styling for mobile */
+	input[type="text"]:focus,
+	select:focus,
+	textarea:focus {
+		transform: scale(1.02);
+		transition: transform 0.2s ease;
+	}
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+	/* Container and layout adjustments */
 	.container {
 		margin: 10px 0.5rem;
 		padding: 1rem;
+		flex-direction: column;
+		gap: 1rem;
 	}
 	
+	/* Cat positioning for mobile */
 	.cat-container {
 		top: -30px;
 		right: 10px;
@@ -248,7 +315,153 @@ button:hover {
 		height: 60px;
 	}
 	
+	/* Card improvements */
+	.card {
+		padding: 1.5rem;
+		margin-bottom: 1rem;
+	}
+	
+	/* Form elements sizing */
+	input[type="text"],
+	select,
+	textarea {
+		padding: 0.875rem;
+		font-size: 16px; /* Prevents zoom on iOS */
+	}
+	
+	/* Button improvements */
+	button {
+		padding: 0.875rem 1.5rem;
+		font-size: 16px;
+		min-height: 44px; /* Touch target size */
+	}
+	
+	/* Upload area for mobile */
+	.upload-area {
+		padding: 1.5rem;
+	}
+	
+	/* Grid layout for mobile */
 	.items-grid {
 		grid-template-columns: 1fr;
+		gap: 0.75rem;
+	}
+	
+	/* Item cards for mobile */
+	.item-card,
+	.item-card-with-image {
+		padding: 1rem;
+	}
+	
+	/* Image sizing for mobile */
+	.item-image {
+		width: 50px;
+		height: 50px;
+	}
+	
+	/* Modal improvements for mobile */
+	.modal-content {
+		max-width: 95%;
+		max-height: 95%;
+		padding: 0.75rem;
+	}
+	
+	.modal-close {
+		width: 35px;
+		height: 35px;
+		font-size: 18px;
+		top: -8px;
+		right: -8px;
+	}
+	
+	/* Text sizing for mobile */
+	h2 {
+		font-size: 1.5rem;
+	}
+	
+	/* Display section scrolling */
+	#closetItemsDisplay {
+		max-height: 400px;
+	}
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+	.container {
+		margin: 5px 0.25rem;
+		padding: 0.75rem;
+	}
+	
+	.card {
+		padding: 1rem;
+	}
+	
+	/* Smaller text for very small screens */
+	h2 {
+		font-size: 1.25rem;
+	}
+	
+	/* Category headings */
+	.category-heading {
+		padding: 0.5rem;
+		font-size: 0.9rem;
+	}
+	
+	/* Upload area for small screens */
+	.upload-area {
+		padding: 1rem;
+	}
+	
+	/* Image preview sizing */
+	#previewImg {
+		width: 60px;
+		height: 60px;
+	}
+	
+	/* Modal adjustments for small screens */
+	.modal-content {
+		padding: 0.5rem;
+	}
+	
+	.modal-info h3 {
+		font-size: 1.25rem;
+	}
+	
+	.modal-info p {
+		font-size: 0.875rem;
+	}
+}
+
+/* Touch improvements for all mobile devices */
+@media (max-width: 768px) {
+	/* Ensure all interactive elements are touch-friendly */
+	.category-heading,
+	.item-card,
+	.item-card-with-image,
+	.item-image {
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+	}
+	
+	/* Better spacing for touch */
+	.item-card {
+		margin-bottom: 1rem;
+	}
+	
+	/* Improved hover states for touch */
+	.item-card:hover,
+	.item-card-with-image:hover {
+		transform: none;
+		background-color: #f3f4f6;
+	}
+	
+	/* Better focus states */
+	input:focus,
+	select:focus,
+	textarea:focus,
+	button:focus {
+		outline: 2px solid #2563eb;
+		outline-offset: 2px;
 	}
 }

@@ -433,6 +433,105 @@ function setupDragAndDrop() {
 }
 
 /**
+ * Mobile-specific enhancements
+ */
+function setupMobileEnhancements() {
+    // Prevent zoom on input focus for iOS
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            // Temporarily disable zoom
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            // Re-enable zoom
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=yes';
+            }
+        });
+    });
+    
+    // Enhanced touch support for upload area
+    const uploadArea = document.getElementById('uploadArea');
+    if (uploadArea) {
+        uploadArea.addEventListener('touchstart', function(e) {
+            uploadArea.classList.add('active');
+        }, { passive: true });
+        
+        uploadArea.addEventListener('touchend', function(e) {
+            uploadArea.classList.remove('active');
+        }, { passive: true });
+    }
+    
+    // Add haptic feedback for mobile devices (if supported)
+    if ('vibrate' in navigator) {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                navigator.vibrate(50); // Short vibration
+            });
+        });
+    }
+    
+    // Optimize scrolling for mobile
+    const scrollableElements = document.querySelectorAll('#closetItemsDisplay');
+    scrollableElements.forEach(element => {
+        element.style.webkitOverflowScrolling = 'touch';
+    });
+    
+    // Add double-tap to zoom prevention for buttons
+    const interactiveElements = document.querySelectorAll('button, .item-image, .category-heading');
+    interactiveElements.forEach(element => {
+        element.addEventListener('touchend', function(e) {
+            e.preventDefault();
+        });
+    });
+}
+
+/**
+ * Check if device is mobile
+ */
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.innerWidth <= 768);
+}
+
+/**
+ * Optimize performance for mobile
+ */
+function optimizeForMobile() {
+    if (isMobileDevice()) {
+        // Reduce animation duration for mobile
+        const style = document.createElement('style');
+        style.textContent = `
+            .item-card, .item-card-with-image {
+                transition: transform 0.1s ease !important;
+            }
+            .image-modal {
+                transition: opacity 0.2s ease, visibility 0.2s ease !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Disable hover effects on mobile
+        const hoverElements = document.querySelectorAll('.item-card, .item-card-with-image');
+        hoverElements.forEach(element => {
+            element.addEventListener('touchstart', function() {
+                this.style.transform = 'translateY(-1px)';
+            });
+            element.addEventListener('touchend', function() {
+                this.style.transform = '';
+            });
+        });
+    }
+}
+
+/**
  * Check backend health
  */
 async function checkBackendHealth() {
@@ -466,7 +565,7 @@ function showImageModal(imageUrl, itemName, itemDescription, itemCategory) {
     modal.className = 'image-modal';
     modal.innerHTML = `
         <div class="modal-content">
-            <button class="modal-close" onclick="closeImageModal()">&times;</button>
+            <button class="modal-close" onclick="closeImageModal()" aria-label="Close modal">&times;</button>
             <img src="${imageUrl}" alt="${itemName}" class="modal-image">
             <div class="modal-info">
                 <h3>${itemName}</h3>
@@ -479,17 +578,42 @@ function showImageModal(imageUrl, itemName, itemDescription, itemCategory) {
     // Add modal to body
     document.body.appendChild(modal);
 
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+
     // Show modal with animation
     setTimeout(() => {
         modal.classList.add('active');
     }, 10);
 
-    // Close modal when clicking outside
+    // Close modal when clicking/tapping outside
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             closeImageModal();
         }
     });
+
+    // Touch support for mobile
+    let startY = 0;
+    let currentY = 0;
+    
+    modal.addEventListener('touchstart', function(e) {
+        if (e.target === modal) {
+            startY = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    modal.addEventListener('touchmove', function(e) {
+        if (e.target === modal) {
+            currentY = e.touches[0].clientY;
+            const deltaY = Math.abs(currentY - startY);
+            
+            // If user swipes down significantly, close modal
+            if (deltaY > 50 && currentY > startY) {
+                closeImageModal();
+            }
+        }
+    }, { passive: true });
 
     // Close modal with Escape key
     const escapeHandler = function(e) {
@@ -508,6 +632,10 @@ function closeImageModal() {
     const modal = document.getElementById('imageModal');
     if (modal) {
         modal.classList.remove('active');
+        
+        // Restore body scrolling
+        document.body.style.overflow = '';
+        
         setTimeout(() => {
             if (modal.parentNode) {
                 modal.parentNode.removeChild(modal);
@@ -600,6 +728,12 @@ async function initializeApp() {
     if (isHealthy) {
         await fetchItems();
     }
+    
+    // Setup mobile enhancements
+    setupMobileEnhancements();
+    
+    // Optimize for mobile
+    optimizeForMobile();
     
     console.log('✅ App initialized');
 }
