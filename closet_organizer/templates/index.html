@@ -133,9 +133,19 @@
 		<div class="w-full lg:w-2/3 card">
 			<h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">My Closet</h2>
 			<div class="space-y-4" id="closetItemsDisplay">
-				<p id="noItemsMessage" class="text-gray-500 text-center">
-					No items added yet. Start by adding some!
-				</p>
+				{% if items %}
+					{% for item in items %}
+						<div class="p-4 bg-white rounded-lg shadow-md">
+							<h3 class="text-lg font-bold text-gray-800">{{ item.name }}</h3>
+							<p class="text-sm text-gray-600">{{ item.category }}</p>
+							<p class="text-sm text-gray-500">{{ item.description }}</p>
+						</div>
+					{% endfor %}
+				{% else %}
+					<p id="noItemsMessage" class="text-gray-500 text-center">
+						No items added yet. Start by adding some!
+					</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>
