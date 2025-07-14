@@ -59,9 +59,9 @@
 			</div>
 
 			<!-- Form -->
-			<form id="itemForm" class="space-y-4" method="POST">
+			<form id="itemForm" class="space-y-4" method="POST" enctype="multipart/form-data">
 				{% csrf_token %}
-				<input type="hidden" name="type" value="additem">
+				<input type="hidden" name="type" value="add">
 				<div>
 					<label for="itemName" class="block text-sm font-medium text-gray-700 mb-1">Item Name:</label>
 					<input type="text" id="itemName" name="itemName" required placeholder="e.g., Blue Jeans"
@@ -95,7 +95,7 @@
 				<div>
 					<label class="block text-sm font-medium text-gray-700 mb-1">Upload Image (Optional):</label>
 					<div id="uploadArea" class="upload-area" onclick="document.getElementById('imageInput').click()">
-						<input type="file" id="imageInput" accept="image/*" style="display: none;">
+						<input type="file" id="imageInput" name="imageInput" accept="image/*" style="display: none;">
 						<div id="uploadContent">
 							<svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
 								viewBox="0 0 48 48">
@@ -143,17 +143,23 @@
 						{% for item in items %}
 						<form method="POST">
 							{% csrf_token %}
-							<input type="hidden" name="type" value="deleteitem">
+							<input type="hidden" name="type" value="delete">
 							<input type="hidden" name="item_id" value="{{ item.id }}">
 							<div class="p-4 bg-gray-100 rounded-lg shadow-inner mb-2 flex justify-between items-center">
 								<div>
 									<h3 class="text-lg font-bold text-gray-800">{{ item.name }}</h3>
 									<p class="text-sm text-gray-500">{{ item.description }}</p>
+									{% if item.image_data %}
+									<img src="{% url 'serve_image' item.id %}" alt="{{ item.name }}"
+										class="mt-2 h-20 w-20 object-cover rounded-lg cursor-pointer"
+										onclick="showImageModal(this.src, '{{ item.name|escapejs }}', '{{ item.description|escapejs }}', '{{ item.category }}')">
+									{% endif %}
 								</div>
 								<button class="text-red-500 hover:text-red-700 delete-item-btn"
 									data-item-id="{{ item.id }}">Delete</button>
 							</div>
 						</form>
+
 						{% endfor %}
 					</div>
 				</details>
@@ -168,7 +174,226 @@
 	</div>
 
 	<!-- Custom JavaScript -->
-	<!-- <script src="{% static 'script.js' %}"></script> -->
+	<script>
+		// Form handling
+
+
+		// Image handling
+		function clearImage() {
+			document.getElementById('imageInput').value = '';
+			document.getElementById('uploadContent').classList.remove('hidden');
+			document.getElementById('imagePreview').classList.add('hidden');
+		}
+
+		function handleImageInput(e) {
+			const file = e.target.files[0];
+			if (file) {
+				// Validate file size (10MB limit)
+				if (file.size > 10 * 1024 * 1024) {
+					alert("File size must be less than 10MB");
+					clearImage();
+					return;
+				}
+
+				// Validate file type
+				if (!file.type.startsWith('image/')) {
+					alert("Please select a valid image file");
+					clearImage();
+					return;
+				}
+
+				// Show preview
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					document.getElementById('previewImg').src = e.target.result;
+					document.getElementById('uploadContent').classList.add('hidden');
+					document.getElementById('imagePreview').classList.remove('hidden');
+				};
+				reader.readAsDataURL(file);
+			}
+		}
+
+		document.getElementById('imageInput').addEventListener('change', handleImageInput);
+
+		// Drag and drop functionality
+		function setupDragAndDrop() {
+			const uploadArea = document.getElementById('uploadArea');
+
+			uploadArea.addEventListener('dragover', function (e) {
+				e.preventDefault();
+				uploadArea.classList.add('dragover');
+			});
+
+			uploadArea.addEventListener('dragleave', function (e) {
+				e.preventDefault();
+				uploadArea.classList.remove('dragover');
+			});
+
+			uploadArea.addEventListener('drop', function (e) {
+				e.preventDefault();
+				uploadArea.classList.remove('dragover');
+
+				const files = e.dataTransfer.files;
+				if (files.length > 0) {
+					const file = files[0];
+					const imageInput = document.getElementById('imageInput');
+
+					// Create a new FileList with the dropped file
+					const dt = new DataTransfer();
+					dt.items.add(file);
+					imageInput.files = dt.files;
+
+					// Trigger the change event
+					imageInput.dispatchEvent(new Event('change'));
+				}
+			});
+		}
+
+		// Image modal functionality
+		function showImageModal(imageUrl, itemName, itemDescription, itemCategory) {
+			// Remove existing modal if any
+			const existingModal = document.getElementById('imageModal');
+			if (existingModal) {
+				existingModal.remove();
+			}
+
+			// Create modal HTML
+			const modal = document.createElement('div');
+			modal.id = 'imageModal';
+			modal.className = 'image-modal';
+			modal.innerHTML = `
+				<div class="modal-content">
+					<button class="modal-close" onclick="closeImageModal()" aria-label="Close modal">&times;</button>
+					<img src="${imageUrl}" alt="${itemName}" class="modal-image">
+					<div class="modal-info">
+						<h3>${itemName}</h3>
+						<p><strong>Category:</strong> ${itemCategory}</p>
+						${itemDescription ? `<p><strong>Description:</strong> ${itemDescription}</p>` : ''}
+					</div>
+				</div>
+			`;
+
+			// Add modal to body
+			document.body.appendChild(modal);
+
+			// Prevent body scrolling when modal is open
+			document.body.style.overflow = 'hidden';
+
+			// Show modal with animation
+			setTimeout(() => {
+				modal.classList.add('active');
+			}, 10);
+
+			// Close modal when clicking outside
+			modal.addEventListener('click', function (e) {
+				if (e.target === modal) {
+					closeImageModal();
+				}
+			});
+
+			// Close modal with Escape key
+			const escapeHandler = function (e) {
+				if (e.key === 'Escape') {
+					closeImageModal();
+					document.removeEventListener('keydown', escapeHandler);
+				}
+			};
+			document.addEventListener('keydown', escapeHandler);
+		}
+
+		function closeImageModal() {
+			const modal = document.getElementById('imageModal');
+			if (modal) {
+				modal.classList.remove('active');
+				document.body.style.overflow = '';
+				setTimeout(() => {
+					modal.remove();
+				}, 300);
+			}
+		}
+
+		// Initialize app
+		document.addEventListener('DOMContentLoaded', function () {
+			setupDragAndDrop();
+		});
+	</script>
+
+	<style>
+		/* Modal Styles */
+		.image-modal {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.8);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 1000;
+			opacity: 0;
+			visibility: hidden;
+			transition: opacity 0.3s ease, visibility 0.3s ease;
+		}
+
+		.image-modal.active {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		.modal-content {
+			position: relative;
+			max-width: 90%;
+			max-height: 90%;
+			background: white;
+			border-radius: 8px;
+			padding: 1rem;
+			text-align: center;
+		}
+
+		.modal-close {
+			position: absolute;
+			top: -10px;
+			right: -10px;
+			background: #ff4444;
+			color: white;
+			border: none;
+			border-radius: 50%;
+			width: 30px;
+			height: 30px;
+			cursor: pointer;
+			font-size: 16px;
+		}
+
+		.modal-image {
+			max-width: 100%;
+			max-height: 70vh;
+			object-fit: contain;
+		}
+
+		.modal-info {
+			margin-top: 1rem;
+			text-align: center;
+		}
+
+		.modal-info h3 {
+			font-size: 1.5rem;
+			font-weight: bold;
+			color: #1f2937;
+			margin-bottom: 0.5rem;
+		}
+
+		.modal-info p {
+			color: #6b7280;
+			margin-bottom: 0.25rem;
+		}
+
+		/* Upload area dragover effect */
+		.upload-area.dragover {
+			border-color: #2563eb;
+			background-color: #eff6ff;
+		}
+	</style>
 </body>
 
 </html>
