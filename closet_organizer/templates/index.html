@@ -59,7 +59,9 @@
 			</div>
 
 			<!-- Form -->
-			<form id="itemForm" class="space-y-4">
+			<form id="itemForm" class="space-y-4" method="POST">
+				{% csrf_token %}
+				<input type="hidden" name="type" value="additem">
 				<div>
 					<label for="itemName" class="block text-sm font-medium text-gray-700 mb-1">Item Name:</label>
 					<input type="text" id="itemName" name="itemName" required placeholder="e.g., Blue Jeans"
@@ -133,25 +135,40 @@
 		<div class="w-full lg:w-2/3 card">
 			<h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">My Closet</h2>
 			<div class="space-y-4" id="closetItemsDisplay">
-				{% if items %}
-					{% for item in items %}
-						<div class="p-4 bg-white rounded-lg shadow-md">
-							<h3 class="text-lg font-bold text-gray-800">{{ item.name }}</h3>
-							<p class="text-sm text-gray-600">{{ item.category }}</p>
-							<p class="text-sm text-gray-500">{{ item.description }}</p>
-						</div>
-					{% endfor %}
+				{% if categorized_items %}
+				{% for category, items in categorized_items.items %}
+				<details class="bg-pink-200 border-gray-300 rounded-lg shadow-md">
+					<summary class="p-4 font-bold text-gray-800 cursor-pointer">{{ category }}</summary>
+					<div class="p-4">
+						{% for item in items %}
+						<form method="POST">
+							{% csrf_token %}
+							<input type="hidden" name="type" value="deleteitem">
+							<input type="hidden" name="item_id" value="{{ item.id }}">
+							<div class="p-4 bg-gray-100 rounded-lg shadow-inner mb-2 flex justify-between items-center">
+								<div>
+									<h3 class="text-lg font-bold text-gray-800">{{ item.name }}</h3>
+									<p class="text-sm text-gray-500">{{ item.description }}</p>
+								</div>
+								<button class="text-red-500 hover:text-red-700 delete-item-btn"
+									data-item-id="{{ item.id }}">Delete</button>
+							</div>
+						</form>
+						{% endfor %}
+					</div>
+				</details>
+				{% endfor %}
 				{% else %}
-					<p id="noItemsMessage" class="text-gray-500 text-center">
-						No items added yet. Start by adding some!
-					</p>
+				<p id="noItemsMessage" class="text-gray-500 text-center">
+					No items added yet. Start by adding some!
+				</p>
 				{% endif %}
 			</div>
 		</div>
 	</div>
 
 	<!-- Custom JavaScript -->
-	<script src="{% static 'script.js' %}"></script>
+	<!-- <script src="{% static 'script.js' %}"></script> -->
 </body>
 
 </html>
