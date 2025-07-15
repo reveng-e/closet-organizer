@@ -149,8 +149,13 @@
 								<div>
 									<h3 class="text-lg font-bold text-gray-800">{{ item.name }}</h3>
 									<p class="text-sm text-gray-500">{{ item.description }}</p>
-									{% if item.image_data %}
+									{% if item.image_data and item.id and item.pk %}
 									<img src="{% url 'serve_image' item.id %}" alt="{{ item.name }}"
+										class="mt-2 h-20 w-20 object-cover rounded-lg cursor-pointer"
+										onclick="showImageModal(this.src, '{{ item.name|escapejs }}', '{{ item.description|escapejs }}', '{{ item.category }}')">
+									{% elif item.image_data %}
+									<!-- Fallback: show image as base64 data URL if ID is not available -->
+									<img src="{{ item.get_image_data_url }}" alt="{{ item.name }}"
 										class="mt-2 h-20 w-20 object-cover rounded-lg cursor-pointer"
 										onclick="showImageModal(this.src, '{{ item.name|escapejs }}', '{{ item.description|escapejs }}', '{{ item.category }}')">
 									{% endif %}

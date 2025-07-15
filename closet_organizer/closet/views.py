@@ -36,7 +36,7 @@ def index(request):
                     item_data['image_filename'] = image_file.name
                     item_data['image_content_type'] = image_file.content_type
                 
-                ClothingItem.objects.create(**item_data)
+                new_item = ClothingItem.objects.create(**item_data)
                 
             except Exception as e:
                 return JsonResponse({'success': False, 'error': str(e)})
@@ -48,10 +48,16 @@ def index(request):
             except (ClothingItem.DoesNotExist, json.JSONDecodeError):
                 return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
-    items = ClothingItem.objects.filter(user_id=user_id)
+    items = ClothingItem.objects.filter()
     categorized_items = defaultdict(list)
     for item in items:
-        categorized_items[item.category].append(item)
+        # Only include items that have valid IDs
+        print(item)  # Debug print
+        if item.id is not None:
+            categorized_items[item.category].append(item)
+        else:
+            # Log or handle items with None ID (for debugging)
+            print(f"Warning: Item '{item.name}' has None ID, skipping...")
     
     return render(request, 'index.html', {'categorized_items': dict(categorized_items)})
 
