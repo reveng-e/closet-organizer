@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from dotenv import load_dotenv
 from pathlib import Path
+import os
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&uz(h%i24z$35_mq*5x)g8&n#c+cu%ur3*ci^1^*av$@njlzzm'
+SECRET_KEY = os.getenv('SECRET_KEY') 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".vercel.app"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vercel.app"]
 
 
 # Application definition
@@ -80,7 +82,7 @@ DATABASES = {
             'NAME': 'closet',
             'ENFORCE_SCHEMA': False,
             'CLIENT': {
-                'host': 'mongodb+srv://riddhi:Jaden*0409@closet.mk9xkpg.mongodb.net/?retryWrites=true&w=majority&appName=Closet'
+                'host': os.getenv('MONGODB_URI') 
             }  
         }
 }
