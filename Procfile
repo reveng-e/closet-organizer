@@ -1,1 +1,1 @@
-web: cd closet_organizer && python manage.py runserver 8000
+web: cd closet_organizer && python manage.py runserver 0.0.0.0:$PORT
