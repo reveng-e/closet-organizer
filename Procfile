@@ -1,1 +1,1 @@
-web: python manage.py runserver 8000
+web: cd closet_organizer && python manage.py runserver 8000
